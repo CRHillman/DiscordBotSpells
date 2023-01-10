@@ -30,23 +30,21 @@ async def on_message(message):
 
   if (message.content.startswith('!')):
     spell = clean(message.content)
-    site = 'https://www.dnd-spells.com/spell/' + spell.lower()
+    site = 'http://dnd5e.wikidot.com/spell:' + spell.lower()
     
     #await message.channel.send( site )
 
     response = requests.get(site)
 
-    wording_start = response.text.find('h1') - 1
+    phrase = '<div class="content-separator" style="display: none:"></div>'
 
-    #print( response.text[wording_start:wording_start + 4000] )
+    wording_start = response.text.find( phrase ) - 1
+
+    #print( response.text[wording_start:wording_start + 2000] )
 
     #print( '\n' )
 
-    hr1 = response.text.find('<hr>')
-    hr2 = response.text.find('<hr>', hr1 + 1)
-    hr3 = response.text.find('<hr>', hr2 + 1)
-
-    wording_end = response.text.find('<hr>', hr3 + 1)
+    wording_end = response.text.find( phrase, wording_start + len(phrase) + 1 )
 
     #print( "Wording start: ", wording_start )
     #print( "Wording end: ", wording_end )
@@ -55,11 +53,18 @@ async def on_message(message):
 
     parts = ( len(wording)//2000 ) + 1
 
-    for i in range(parts):
-      try:
-        await message.channel.send( wording [ (i*2000):(i+1)*2000 ] ) 
-      except:
-        pass  
+    # if there is no spell to find
+    if ( len(wording) == 1 ):
+      await message.channel.send( 'No spell named: "' + message.content[1:] + '" found.')
+    else:
+      # print the spell name
+      await message.channel.send( '***' + message.content[1:].upper() + '***' )
+      for i in range(parts):
+        try:
+          await message.channel.send( wording [ (i*2000):(i+1)*2000 ] ) 
+            
+        except:
+          pass  
     
 
 def clean(string):
@@ -67,7 +72,7 @@ def clean(string):
   cleaned = str()
 
   for char in string:
-    if (char in ' -'):
+    if (char in ' -/'):
       cleaned += '-'
 
     if (char.isalpha()):
