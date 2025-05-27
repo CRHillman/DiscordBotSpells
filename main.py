@@ -2,6 +2,10 @@ import os
 import discord
 import requests
 from homebrew import blairs
+from dotenv import load_dotenv
+
+# load the environment variables
+load_dotenv()
 
 TOKEN = os.environ['TOKEN']
 
