@@ -1,5 +1,5 @@
 blairs = {}
-blairs["belaers-transformation"] = """Source: Blair's Pamphlet of Most Things
+blairs["belaers-transformation"] = """Source: Blair's Binder of Most Things
 8th-level transmutation
 **Casting Time**: 1 action
 **Range**: Self

@@ -3,6 +3,8 @@ import discord
 import requests
 from homebrew import blairs
 from dotenv import load_dotenv
+from initiative_tracker import InitiativeTracker
+from spell_retriever import get_spell
 
 # load the environment variables
 load_dotenv()
@@ -16,155 +18,107 @@ intents.message_content = True
 
 # create the bot
 client = discord.Client( intents=intents )
-
+init_tracker = InitiativeTracker()
 
 # when it logs on
 @client.event
 async def on_ready():
-  print( f'{client.user} is now online!' )
+	print( f'{client.user} is now online!' )
 
 
 # when a message appears
 @client.event
 async def on_message( message ):
-  # print( message.content )
+	# print( message.content )
 
-  # to break the loop
-  if ( message.author == client.user ):
-    return
+	# to break the loop
+	if ( message.author == client.user ):
+		return
 
-  if ( message.content.startswith( '!' ) ):
-    spell = clean( message.content ).lower()
+	if ( message.content.startswith( '!' ) ):
+		if message.content.startswith('!init '):
+			try:
+				msg = await init_tracker.new_initiative( message )
+				# print the tracker
+				await message.channel.send(msg + str(init_tracker))
+			except (IndexError, ValueError):
+				await message.channel.send('Please provide a valid number after !init.')
 
-    try:
-      wording = blairs[spell]
-      # break into message-sized pieces
-      parts = ( len( wording ) // 2000 ) + 1
+		elif message.content.startswith('!add '):
+			try:
+				# Usage: !add <name>: <initiative_value>
+				parts = message.content[len('!add '):].split(':', 1)
+				if len(parts) != 2:
+					raise ValueError
+				name = parts[0].strip()
+				value = int(parts[1].strip())
+    
+				if not name:
+					raise ValueError
+ 
+				init_tracker.add(name, value)
+    
+    			# print the tracker
+				await message.channel.send(init_tracker)
+    
+			except Exception as e:
+				print(f'Error adding initiative: {e}')
+				await message.channel.send('Usage: !add <name>: <initiative_value>')
+    
+		elif message.content.startswith('!remove') or message.content.startswith('!rm'):
+			try:
+				# Usage: !remove <name> or !rm <name>
+				if message.content.startswith('!remove '):
+					name = message.content[len('!remove '):].strip()
+     
+				elif message.content.startswith('!rm '):
+					name = message.content[len('!rm '):].strip()
+     
+				else:
+					raise IndexError
+ 
+				if not name:
+					raise IndexError
+ 
+				init_tracker.remove(name)
+    
+				# print the tracker
+				await message.channel.send(init_tracker)
+    
+			except IndexError:
+				await message.channel.send('Usage: !remove <name> or !rm <name>')
 
-      # print spell name
-      await message.channel.send( '***' + message.content[1:].upper() + '***' )
+		elif message.content.startswith('!swap') or message.content.startswith('!switch'):
+			try:
+				# Usage: !swap <name1> | <name2> or !switch <name1> | <name2>
+				if message.content.startswith('!swap '):
+					args = message.content[len('!swap '):].split('|', 1)
+     
+				elif message.content.startswith('!switch '):
+					args = message.content[len('!switch '):].split('|', 1)
+     
+				else:
+					raise IndexError
 
-      # send all the pieces
-      for i in range( parts ):
-        try:
-          await message.channel.send( wording[( i * 2000 ):( i + 1 ) * 2000] )
+				if len(args) != 2:
+					raise IndexError
 
-        except:
-          pass
-      return
+				name1 = args[0].strip()
+				name2 = args[1].strip()
 
-    except KeyError:
-      pass
+				if not name1 or not name2:
+					raise IndexError
 
-    site = 'http://dnd5e.wikidot.com/spell:' + spell
+				init_tracker.swap(name1, name2)
+    
+				# print the tracker
+				await message.channel.send(init_tracker)
 
-    #await message.channel.send(  site  )
-
-    response = requests.get( site )
-
-    phrase = '<div class="content-separator" style="display: none:"></div>'
-
-    wording_start = response.text.find( phrase ) - 1
-
-    wording_end = response.text.find( phrase, wording_start + len( phrase ) + 1 )
-
-    #print(  "Wording start: ", wording_start  )
-    #print(  "Wording end: ", wording_end  )
-
-    wording = add_styling( response.text[wording_start:wording_end] )
-
-    wording = remove_html( wording )
-
-    # break into message-sized pieces
-    parts = ( len( wording ) // 2000 ) + 1
-
-    # if there is no spell to find
-    if ( len( wording ) == 1 ):
-      await message.channel.send( 'No spell named: "' + message.content[1:] +
-                                 '" found.' )
-
-    else:
-      # print the spell name
-      await message.channel.send( '***' + message.content[1:].upper() + '***' )
-      for i in range( parts ):
-        # send all the pieces
-        try:
-          await message.channel.send( wording[( i * 2000 ):( i + 1 ) * 2000] )
-
-        except:
-          pass
-
-
-def clean( string ):
-  '''
-  Converts spaces, dashes, and slashes into hyphens
-  '''
-  cleaned = str()
-
-  for char in string:
-    if ( char in ' -/' ):
-      cleaned += '-'
-
-    if ( char.isalpha() ):
-      cleaned += str( char )
-
-  return cleaned
-
-
-def remove_html( source ):
-
-  ignore = False
-  multi_space = False
-
-  wording = ''
-
-  for char in source:
-    # ignore tags
-    if ( char in '<' ):
-      ignore = True
-
-    # read other things
-    if not ignore:
-      # ampersands are weird
-      if ( char in '&' ):
-        wording += '\n'
-        ignore = True
-
-      else:
-        # avoid wasting characters on spaces
-        if ( char in ' ' ) and ( multi_space ):
-          pass
-
-        else:
-          wording += char
-          multi_space = False
-
-    # stop ignoring because tag ended
-    if ( char in '>;' ):
-      ignore = False
-
-    # ignore multiple spaces
-    elif ( char in ' ' ):
-      multi_space = True
-
-  return wording
-
-
-def add_styling( source ):
-
-  replacements = [
-    ( "<strong>", '**' ), 
-    ( "</strong>", '**' ), 
-    ( "&quot;", '"' )
-  ]
-
-  styled = source
-
-  for old, new in replacements:
-    styled = styled.replace( old, new )
-
-  return styled
-
+			except IndexError:
+				await message.channel.send('Usage: !swap <name1> | <name2> or !switch <name1> | <name2>')
+   
+		else:
+			await get_spell( message )
 
 # always needed at the end
 client.run( TOKEN )
