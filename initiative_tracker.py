@@ -103,5 +103,5 @@ class InitiativeTracker:
         """
         Returns the current entries in initiative order as a formatted string.
         """
-        printed_entries = "\n".join(f"{name}: {value}" for name, value in self._entries.items())
+        printed_entries = "\n".join(f"{name:>30} | {value:>3}" for name, value in self._entries.items())
         return f"```\n{printed_entries}\n```"

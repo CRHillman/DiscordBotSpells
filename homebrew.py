@@ -33,3 +33,19 @@ You may add both your Strength modifier and your spellcasting ability modifier t
 
 Immediately after the spell ends, you must succeed on a DC 15 Constitution saving throw or suffer one level of exhaustion.
 **Spell Lists.** Bard, Sorcerer, Wizard"""
+
+blairs["blairs-heroes-feast"] = """Source: Blair's Binder of Most Things
+6th-level conjuration
+**Casting Time**: 10 minutes
+**Range/Area**: 30 ft.
+**Components**: V, S, M - (a gem-encrusted bowl worth at least 1,000 gp.)
+**Duration**: Instantaneous
+
+You bring forth a great feast, including magnificent food and drink. 
+The feast takes 1 hour to consume and disappears at the end of that time, and the beneficial effects do not set in until this hour is over. 
+Up to twelve creatures can partake of the feast.
+
+A creature that partakes of the feast gains several benefits. 
+The creature is cured of all diseases and poison, becomes immune to the poisoned and frightened, and makes all Wisdom saving throws with advantage. 
+Its hit point maximum also increases by 2d10, and it gains the same number of hit points. 
+These benefits last for 24 hours."""
