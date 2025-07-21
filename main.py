@@ -38,6 +38,7 @@ async def on_message( message ):
 	if ( message.content.startswith( '!' ) ):
 		if message.content.startswith('!init '):
 			try:
+				init_tracker.clear()  # Clear previous entries before starting a new initiative tracker
 				msg = await init_tracker.new_initiative( message )
 				# print the tracker
 				await message.channel.send(msg + str(init_tracker))
