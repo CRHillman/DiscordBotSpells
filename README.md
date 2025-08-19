@@ -52,16 +52,19 @@ The bot will reply with the spell description.
 ### Initiative Tracker Commands
 
 - `!init <number>`  
-  Start a new initiative tracker for `<number>` participants. The bot will collect the next `<number>` valid initiative entries from the channel (ignoring lines starting with `!`).
+  Start a new initiative tracker for `<number>` participants. The bot will collect the previous `<number>` valid initiative entries from the channel (ignoring lines starting with `!`).
 
 - `!add <name>: <initiative_value>`  
-  Add or update a participant with the given name and initiative value.
+  Add a participant to the initiative tracker with the specified initiative value.
 
 - `!remove <name>` or `!rm <name>`  
-  Remove a participant by name.
+  Remove a participant by `<name>` from the initiative tracker.
 
 - `!swap <name1> | <name2>` or `!switch <name1> | <name2>`  
-  Swap the name placements of two participants.
+  Swap the initiative label, but not value, of two participants.
+
+- `!help`  
+  List all available commands.
 
 After each change, the bot will print the current initiative order.
 

@@ -11,6 +11,15 @@ load_dotenv()
 
 TOKEN = os.environ['TOKEN']
 
+COMMANDS = [
+    '* !init `<number>`\nStart a new initiative tracker for `<number>` participants. The bot will collect the previous `<number>` valid initiative entries from the channel (ignoring lines starting with `!`).',
+    '* !add `<name>`: `<initiative_value>`\nAdd a participant to the initiative tracker with the specified initiative value.',
+    '* !remove `<name>` or !rm `<name>`\nRemove a participant by `<name>` from the initiative tracker.',
+    '* !swap `<name1>` | `<name2>` or !switch `<name1>` | `<name2>`\nSwap the initiative label, but not value, of two participants.',
+    '* !help\nList all available commands.',
+	"* !`<spell_name>`\nRetrieve a spell by name from the homebrew database, then the D&D wiki. Spaces and dashes are equivalent, and apostrophes are ignored: so `Tenser's Transformation`, and `tensers-transformation` are correct commands.",
+]
+
 # a basic intents object to start, then edit
 intents = discord.Intents.default()
 intents.messages = True
@@ -118,6 +127,14 @@ async def on_message( message ):
 			except IndexError:
 				await message.channel.send('Usage: !swap <name1> | <name2> or !switch <name1> | <name2>')
    
+		elif message.content.startswith('!help'):
+			# print the commands
+			commands_message = 'Available commands:\n'
+			for command in COMMANDS:
+				commands_message += f'{command}\n'
+
+			await message.channel.send(commands_message)
+
 		else:
 			await get_spell( message )
 
