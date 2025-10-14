@@ -91,15 +91,15 @@ class InitiativeTracker:
             content = msg.content.strip()
             if content.startswith('!'):
                 continue
-            if content.isdigit():
-                self.add(str(msg.author.display_name), int(content))
+            if is_number(content):
+                self.add(str(msg.author.display_name), float(content))
                 count += 1
             elif ':' in content:
                 parts = content.split(':', 1)
                 name = parts[0].strip()
                 num_part = parts[1].strip()
-                if num_part.isdigit():
-                    self.add(name, int(num_part))
+                if is_number(num_part):
+                    self.add(name, float(num_part))
                     count += 1
             if count == number:
                 break
@@ -117,10 +117,18 @@ class InitiativeTracker:
         """
         Returns the current entries in initiative order as a formatted string.
         """
-        printed_entries = "\n".join(f"{name:>30} | {value:>3}" for name, value in self._entries)
+        printed_entries = "\n".join(f"{name:>30} | {value:<}" for name, value in self._entries)
         return f"```\n{printed_entries}\n```"
     
     
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 if __name__ == "__main__":
     tracker = InitiativeTracker()
     print(tracker.add("Alice", 15))
@@ -136,10 +144,11 @@ if __name__ == "__main__":
     
     print(tracker.add("Diana", 18))
     print(tracker.add("Eve", 20))      # Value collision with Bob
-    print(tracker.add("Frank", 10))    # Value collision with Charlie
+    print(tracker.add("Frank", -10))    # negative value test
     print(tracker.add("Grace", 15))    # Value collision with Alice (already removed)
-    print(tracker.add("Heidi", 12))
+    print(tracker.add("Heidi", 12.8))
     print(tracker.add("Ivan", 18))     # Value collision with Diana
+    print(tracker.add("Judy", 7))   # New entry
 
     print(tracker.swap("Bob", "Diana"))  # Swapping Bob and Diana
 
