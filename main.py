@@ -61,7 +61,7 @@ async def on_message( message ):
 				if len(parts) != 2:
 					raise ValueError
 				name = parts[0].strip()
-				value = int(parts[1].strip())
+				value = float(parts[1].strip())
     
 				if not name:
 					raise ValueError
